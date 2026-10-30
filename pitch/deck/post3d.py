@@ -71,6 +71,18 @@ def cctv():
     rounded(im).save(A / "cctv-3d.png")
 
 
+def feather(im, margin=0.1):
+    """투명 배경 렌더의 그림자가 이미지 가장자리에서 뚝 끊기지 않게 알파를 가장자리로 갈수록 줄인다."""
+    im = im.convert("RGBA")
+    w, h = im.size
+    mask = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(mask).rectangle([w * margin, h * margin, w * (1 - margin), h * (1 - margin)], fill=255)
+    mask = mask.filter(ImageFilter.GaussianBlur(min(w, h) * margin * 0.6))
+    r, g, b, alpha = im.split()
+    im.putalpha(Image.composite(alpha, Image.new("L", (w, h), 0), mask))
+    return im
+
+
 def card(name, out):
     rounded(Image.open(R / f"{name}.png").convert("RGB")).save(A / out)
 
@@ -79,8 +91,9 @@ if __name__ == "__main__":
     cctv()
     card("sim", "sim-3d.png")
     card("droptest", "drop-3d.png")
-    Image.open(R / "drone.png").save(A / "drone-3d.png")
+    feather(Image.open(R / "drone.png")).save(A / "drone-3d.png")
     Image.open(R / "cover.png").convert("RGB").save(A / "cover-3d.png")
+    feather(Image.open(R / "kit.png")).save(A / "kit-3d.png")
     for name in ("solution", "zone", "fall"):
         card(name, f"{name}-3d.png")
     for name in ("solution", "fall"):   # 배지·라벨 위치(이미지 대비 비율 좌표)

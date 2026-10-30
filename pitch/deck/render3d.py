@@ -1,6 +1,6 @@
 # 피치덱 3D 렌더 (Blender 5.x, Cycles + Metal GPU)
 # 실행: /Applications/Blender.app/Contents/MacOS/Blender -b -P render3d.py -- <scene> <out.png> [samples]
-#   scene: drone | sim | cctv | droptest | solution | cover | zone | fall
+#   scene: drone | sim | cctv | droptest | solution | cover | zone | fall | kit
 # 모든 모델은 기본 도형으로 직접 만든다(외부 에셋 없음). 조명은 Blender 내장 HDRI를 쓴다.
 import bpy, math, sys, json, os, random
 from mathutils import Vector
@@ -399,14 +399,17 @@ def worker3d(loc, face=0.0, vest=ORANGE):
     cyl((tx, ty, z + 1.69), 0.17, 0.02, helmet, verts=24)
 
 
-def beacon3d(loc, h=3.0):
+def beacon3d(loc, h=3.0, light=True, emit=25):
     x, y, z = loc
     pole = mat("pole", "#5C626B", 0.4, metal=0.6)
     rod((x, y, z), (x, y, z + h), 0.05, pole, 12)
     cyl((x, y, z + h + 0.05), 0.14, 0.1, pole, verts=24)
-    o = sphere((x, y, z + h + 0.22), 0.16, mat("beacon", ORANGE, 0.2, emit=25), 24); o.scale.z = 1.3
-    bpy.ops.object.light_add(type="POINT", location=(x, y, z + h + 0.25))
-    l = bpy.context.active_object; l.data.energy = 300; l.data.color = lin(ORANGE); l.data.shadow_soft_size = 0.2
+    lamp = mat("beacon", ORANGE, 0.2, emit=emit)
+    cyl((x, y, z + h + 0.19), 0.11, 0.2, lamp, verts=32)                     # 원통형 회전등
+    o = sphere((x, y, z + h + 0.29), 0.11, lamp, 24); o.scale.z = 0.45
+    if light:
+        bpy.ops.object.light_add(type="POINT", location=(x, y, z + h + 0.25))
+        l = bpy.context.active_object; l.data.energy = 300; l.data.color = lin(ORANGE); l.data.shadow_soft_size = 0.2
 
 
 def edgebox3d(loc):
@@ -417,7 +420,7 @@ def edgebox3d(loc):
     for i in range(7):
         box((x - 0.27 + i * 0.09, y, z + 0.25), (0.04, 0.28, 0.07), fin, 0.005)
     sphere((x + 0.26, y - 0.155, z - 0.15), 0.018, mat("edgeled", ORANGE, 0.3, emit=20), 12)
-    rod((x + 0.25, y, z + 0.22), (x + 0.25, y, z + 0.7), 0.012, fin, 8)
+    rod((x + 0.25, y, z + 0.22), (x + 0.25, y, z + 0.46), 0.012, fin, 8)
 
 
 def cctv3d(loc, yaw_deg, scale=1.0):
@@ -706,6 +709,46 @@ def scene_fall():
     screen_points(cam, named)
 
 
+def helmet3d(loc, rot_deg=0):
+    import bmesh
+    x, y, z = loc
+    shell = mat("hardhat", "#E6E3DB", 0.48, coat=0.25)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=24, radius=0.15, location=(x, y, z))
+    o = bpy.context.active_object
+    bm = bmesh.new(); bm.from_mesh(o.data)
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.z < -0.001], context="VERTS")
+    bm.to_mesh(o.data); bm.free()
+    o.scale = (1.0, 1.15, 0.85); o.data.materials.append(shell); smooth(o)
+    o.rotation_euler.z = math.radians(rot_deg)
+    b = cyl((x, y, z + 0.006), 0.17, 0.012, shell, verts=48); b.scale = (1.0, 1.22, 1.0); b.rotation_euler.z = math.radians(rot_deg)
+    box((x, y, z + 0.118), (0.035, 0.26, 0.022), shell, 0.008, rot=(0, 0, math.radians(rot_deg)))
+    a = math.radians(rot_deg)
+    box((x + 0.15 * math.cos(a), y + 0.15 * math.sin(a), z + 0.06), (0.012, 0.05, 0.035), mat("bletag", ORANGE, 0.4), 0.004, rot=(0, 0, a))
+
+
+def scene_kit():
+    setup_render(1600, 1200, transparent=True)
+    edgebox3d((0.0, 0.05, 0.225))
+    stand = mat("stand", "#5C626B", 0.4, metal=0.6)
+    rod((0.82, 0.3, 0.0), (0.82, 0.3, 0.3), 0.018, stand, 12)
+    cyl((0.82, 0.3, 0.006), 0.07, 0.012, stand, verts=32)
+    cctv3d((0.82, 0.3, 0.36), 285, scale=0.62)
+    beacon3d((-0.78, 0.15, 0.0), 0.42, light=False, emit=3)
+    cyl((-0.78, 0.15, 0.006), 0.08, 0.012, stand, verts=32)
+    tag = mat("tag", "#26292D", 0.5)
+    box((0.3, -0.5, 0.025), (0.16, 0.1, 0.05), tag, 0.02, rot=(0, 0, math.radians(20)))   # BLE 태그
+    box((0.3, -0.5, 0.052), (0.1, 0.06, 0.006), mat("tagface", ORANGE, 0.4), 0.003, rot=(0, 0, math.radians(20)))
+    box((0.15, -0.45, 0.004), (0.22, 0.03, 0.008), mat("strap", "#3A3F46", 0.7), 0.002, rot=(0, 0, math.radians(20)))
+    shadow_catcher()
+    world_hdri("studio", 0.45, 30)
+    area_light((-1.6, -1.8, 2.2), (0, 0, 0.2), 110, 1.8)
+    area_light((2.0, -1.0, 1.4), (0, 0, 0.2), 70, 2.2, "#DDE6F0")
+    area_light((0.0, 2.4, 0.9), (0, 0, 0.2), 45, 2.5)
+    bpy.context.scene.view_settings.exposure = -0.2
+    camera((1.15, -2.55, 1.35), (0.0, -0.05, 0.2), lens=50)
+    render()
+
+
 bpy.ops.wm.read_factory_settings(use_empty=True)
 {"drone": scene_drone, "sim": scene_sim, "cctv": scene_cctv, "droptest": scene_droptest,
- "solution": scene_solution, "cover": scene_cover, "zone": scene_zone, "fall": scene_fall}[SCENE]()
+ "solution": scene_solution, "cover": scene_cover, "zone": scene_zone, "fall": scene_fall, "kit": scene_kit}[SCENE]()
