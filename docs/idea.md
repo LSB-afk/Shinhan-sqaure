@@ -4,6 +4,14 @@
 > 고도화 방향: **"떨어지는 순간을 잡는다" → "맞을 수 있는 상황을 먼저 없애고, 떨어지면 알리고, 모든 낙하를 데이터로 남긴다"**
 > 작성일 2026-10-29. 수치 출처는 문서 끝 [참고자료](#참고자료). `(추정)` 표시는 검증 전 가정.
 
+## 도면
+
+> 원본 SVG(수정용)와 PNG(사업소개서용)는 `docs/diagrams/`에 있다. 문구를 바꾸려면 `build.py`를 고치고 `python3 docs/diagrams/build.py`를 실행한다.
+
+![현장 배치도](diagrams/01-site-layout.png)
+![시스템 구성도](diagrams/02-architecture.png)
+![운영 프로세스](diagrams/03-process.png)
+
 ---
 
 ## 1. 문제 — 왜 낙하물인가
