@@ -8,9 +8,11 @@
 
 > 원본 SVG(수정용)와 PNG(사업소개서용)는 `docs/diagrams/`에 있다. 문구를 바꾸려면 `build.py`를 고치고 `python3 docs/diagrams/build.py`를 실행한다.
 
-![현장 배치도](diagrams/01-site-layout.png)
-![시스템 구성도](diagrams/02-architecture.png)
-![운영 프로세스](diagrams/03-process.png)
+![Fig. 1 프레임워크 개요](diagrams/fig1-framework.png)
+![Fig. 2 타당성 분석](diagrams/fig2-analysis.png)
+![Fig. 3 장비 배치 개념도](diagrams/fig3-site-layout.png)
+![Fig. 4 시스템 계층 구조](diagrams/fig4-architecture.png)
+![Fig. 5 운영 프로세스](diagrams/fig5-process.png)
 
 ---
 
