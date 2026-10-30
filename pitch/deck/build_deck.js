@@ -111,8 +111,7 @@ function fallMotif(s, x, y0, len, n = 6, d = 0.07, color = K.g5) {
 pres.addSection({ title: "표지" });
 {
   const s = pres.addSlide({ masterName: "DARK", sectionTitle: "표지" });
-  rect(s, 0, 3.225 + 4.275 * 820 / 900, W, 7.5 - (3.225 + 4.275 * 820 / 900), "3A3F46");
-  s.addImage({ path: A("site-dark.png"), x: 5.73, y: 3.225, w: 7.6, h: 4.275 });
+  s.addImage({ path: A("cover-3d.png"), x: 0, y: 0, w: W, h: 7.5 });
   T(s, "2026 신한 스퀘어브릿지 대학생 창업 공모전  HERO IR", { x: 0.7, y: 0.7, w: 8, h: 0.3, fontSize: 12, color: K.g5 });
   T(s, "DropZero", { x: 0.7, y: 1.35, w: 7, h: 1.1, fontSize: 64, bold: true, color: K.white });
   T(s, "건설현장 낙하물 사고,\n맞기 전에 막습니다", { x: 0.7, y: 2.6, w: 5, h: 1.2, fontSize: 24, color: K.g3, lineSpacingMultiple: 1.15 });
@@ -148,10 +147,12 @@ pres.addSection({ title: "문제" });
 // ---------------------------------------------------------------- 3. 왜 어려운가
 {
   const s = content("문제", "문제", "30m에서 떨어진 공구는 2.47초 만에 바닥에 닿습니다");
-  s.addImage({ path: A("fall.png"), x: M, y: 1.9, w: 4.0, h: 4.444 });
-  const sc = 4.0 / 900, y0 = 1.9;
-  for (const [t, ypx, hl] of [[1.0, 303, 0], [1.5, 457, 0], [2.0, 672, 0], [2.47, 931, 1]]) {
-    T(s, hl ? "2.47초 · 바닥" : `${t.toFixed(1)}초`, { x: M + 470 * sc, y: y0 + ypx * sc - 0.13, w: 1.6, h: 0.26, fontSize: 12, bold: !!hl, color: hl ? K.orange : K.g7 });
+  const fw = 4.0, fh = 4.444, fy = 1.9;
+  s.addImage({ path: A("fall-3d.png"), x: M, y: fy, w: fw, h: fh });
+  const FP = JSON.parse(fs.readFileSync(A("fall-3d.json")));
+  for (const [k, label, hl] of [["t2", "1.0초", 0], ["t3", "1.5초", 0], ["t4", "2.0초", 0], ["t5", "2.47초 · 바닥", 1]]) {
+    const [px, py] = FP[k];
+    T(s, label, { x: M + px * fw + 0.05, y: fy + py * fh - 0.13, w: 1.4, h: 0.26, fontSize: 12, bold: true, color: hl ? K.orange : K.g8 });
   }
   const pts = [
     ["보고 피하기엔 짧습니다", "경보를 듣고 판단해 1~2m 피하는 데 1.5~2.5초가 걸립니다. 17m보다 낮은 곳에서 떨어지면 경보만으로는 막을 수 없습니다."],
@@ -190,11 +191,10 @@ pres.addSection({ title: "기회" });
 pres.addSection({ title: "솔루션" });
 {
   const s = content("솔루션", "솔루션 · DropZero", "떨어질 물건 아래에 사람이 서 있지 않게 합니다");
-  const ix = 0.45, iy = 2.0, iw = 8.0, ih = 4.5, k = iw / 1600;
-  s.addImage({ path: A("site-light.png"), x: ix, y: iy, w: iw, h: ih });
-  badge(s, ix + 1380 * k, iy + 560 * k, 1);
-  badge(s, ix + 585 * k, iy + 470 * k, 2);
-  badge(s, ix + 490 * k, iy + 40 * k, 3);
+  const ix = 0.45, iy = 2.0, iw = 8.0, ih = 4.5;
+  s.addImage({ path: A("solution-3d.png"), x: ix, y: iy, w: iw, h: ih });
+  const SP = JSON.parse(fs.readFileSync(A("solution-3d.json")));
+  [["zone", 1], ["fall", 2], ["drone", 3]].forEach(([key, n]) => badge(s, ix + SP[key][0] * iw + 0.12, iy + SP[key][1] * ih - 0.5, n));
   const items = [
     ["예방", "인양물 아래 위험구역이 크레인을 따라 움직이고, 사람이 들어오면 바로 경보가 울립니다."],
     ["대응", "물체가 떨어지는 순간을 감지해 0.35초 안에 착지 예상 지점 주변에 대피 경보를 보냅니다."],
@@ -211,7 +211,7 @@ pres.addSection({ title: "솔루션" });
 // ---------------------------------------------------------------- 6. 기능 ① 예방
 {
   const s = content("솔루션", "핵심 기능 ①  예방", "인양물이 움직이면 위험구역도 같이 움직입니다");
-  s.addImage({ path: A("zone.png"), x: 0.45, y: 1.85, w: 6.1, h: 4.88 });
+  s.addImage({ path: A("zone-3d.png"), x: 0.45, y: 1.85, w: 6.1, h: 4.88 });
   const steps = [
     ["인양물 위치 계산", "크레인 후크 카메라와 선회각·반경 데이터로 매달린 자재의 위치를 잡습니다."],
     ["위험구역 생성", "자재가 떨어질 수 있는 바닥 범위에 안전 여유를 더해 구역을 만들고, 크레인이 움직일 때마다 다시 그립니다."],
@@ -265,7 +265,7 @@ pres.addSection({ title: "솔루션" });
 // ---------------------------------------------------------------- 8. 기능 ③ 학습
 {
   const s = content("솔루션", "핵심 기능 ③  학습", "사람이 다치지 않은 낙하까지 모두 기록합니다");
-  s.addImage({ path: A("drone.png"), x: 0.5, y: 2.0, w: 5.4, h: 3.36 });
+  s.addImage({ path: A("drone-3d.png"), x: 0.5, y: 2.0, w: 5.4, h: 3.36 });
   T(s, "작업 전 · 점심 · 작업 종료 후 드론 순찰", { x: 0.7, y: 5.45, w: 5.2, h: 0.35, fontSize: 16, bold: true });
   T(s, "단부 자재 적치, 낙하물방지망 파손, 개구부 덮개 누락을 찾아 아침 TBM 전에 알려줍니다.", { x: 0.7, y: 5.85, w: 5.2, h: 0.7, fontSize: 13, color: K.g7, lineSpacingMultiple: 1.2 });
 
@@ -296,9 +296,9 @@ pres.addSection({ title: "기술" });
 {
   const s = content("기술", "기술", "사고 영상이 없어도 학습할 수 있도록 데이터를 직접 만듭니다");
   const cards = [
-    ["synth-sim.png", "3D 물리 시뮬레이션", "높이, 물체, 조명, 날씨를 바꿔가며 낙하 장면을 대량으로 만듭니다."],
-    ["synth-composite.png", "실제 현장 영상에 합성", "현장 CCTV 배경 위에 렌더링한 낙하물을 모션 블러까지 입혀 붙입니다."],
-    ["synth-test.png", "실측 낙하 시험으로 검증", "더미 물체를 떨어뜨린 실제 영상은 평가에만 써서 실력을 확인합니다."],
+    ["sim-3d.png", "3D 물리 시뮬레이션", "높이, 물체, 조명, 날씨를 바꿔가며 낙하 장면을 대량으로 만듭니다."],
+    ["cctv-3d.png", "실제 현장 영상에 합성", "현장 CCTV 배경 위에 렌더링한 낙하물을 모션 블러까지 입혀 붙입니다."],
+    ["drop-3d.png", "실측 낙하 시험으로 검증", "더미 물체를 떨어뜨린 실제 영상은 평가에만 써서 실력을 확인합니다."],
   ];
   cards.forEach(([img, h, b], i) => {
     const x = M + i * 4.12;

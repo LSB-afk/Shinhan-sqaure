@@ -1,20 +1,23 @@
 # DropZero IR 피치덱 (팀 GA)
 
-- `DropZero_IR_팀GA.pptx`: 편집용 (PowerPoint, 글꼴 Pretendard)
-- `DropZero_IR_팀GA.pdf`: 제출용 (PowerPoint에서 내보냄, 15장)
+- `DropZero_IR_팀GA.pptx`: 편집용 (PowerPoint, 글꼴 Pretendard). 이미지는 모두 Blender 3D 렌더
 
 ## 다시 만들기
 
 ```bash
 npm install            # 처음 한 번 (pptxgenjs, sharp)
-node art.js            # assets/ 일러스트 생성
+for s in drone sim cctv droptest solution cover zone fall; do
+  /Applications/Blender.app/Contents/MacOS/Blender -b -P render3d.py -- $s renders/$s.png 160
+done
+python3 post3d.py      # 렌더 후처리 → assets/*-3d.png
 node build_deck.js     # PPTX 생성
-./export_pdf.sh        # PowerPoint로 PDF 내보내기
+./export_pdf.sh        # (필요할 때만) PowerPoint로 PDF 내보내기
 ```
 
 | 파일 | 내용 |
 |------|------|
 | `build_deck.js` | 슬라이드 구성·문구 (시장 2장은 `market.js`) |
-| `art.js` | 드론·크레인·현장 일러스트. 그림 안에 글자 없음, 라벨은 PPT 텍스트 |
+| `render3d.py` | Blender 장면: 드론, 시뮬레이션·CCTV·낙하 시험, 현장 전경(표지·솔루션), 위험구역, 낙하 다중 노출. 모델은 모두 기본 도형으로 직접 만듦 |
+| `post3d.py` | CCTV 화면 표시·검출 박스, 카드용 둥근 모서리, 배지·시간 라벨 좌표(json) 복사 |
 
 PPTX를 PowerPoint에서 직접 고쳐도 된다. 다시 생성하면 직접 고친 내용은 덮어쓰이니, 큰 수정은 스크립트에서 한다.
